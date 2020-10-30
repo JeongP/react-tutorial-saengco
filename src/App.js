@@ -15,6 +15,9 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      mode: "read",
+      conditioned_id: 2,
+      welcome: {title: 'WELCOME', desc:"REACT WORLD!"},
       subject:{title: 'WEB', sub:"world wide web!"},
       contents: [
         {id:1, title:'HTML', desc:'HTML is for information'},
@@ -24,13 +27,50 @@ class App extends Component {
     }
 
   }
+
   render() {
+    let _title, _desc = null;
+    if (this.state.mode === "welcome") {
+      _title = this.state.welcome.title;
+      _desc = this.state.welcome.desc;
+    } else {
+      let id = this.state.conditioned_id;
+      var i=0;
+      while(i<this.state.contents.length) {
+        if(id === this.state.contents[i].id) {
+          _title = this.state.contents[i].title;
+          _desc = this.state.contents[i].desc;
+          break;
+        }
+        i++;
+      }
+    }
+    console.log('render!', this);
     return (
       <div className="App">
         {/* 상위 컴포넌트의 state 값을 하위 컴포넌트의 props의 값으로 전달하는 것 가능. */}
-        <Subject title={this.state.subject.title} sub={this.state.subject.sub}></Subject>
-        <TOC data={this.state.contents}></TOC>
-        <Content title="HTML" desc="HTML is HyperText Markup Language."></Content>
+        
+        <Subject 
+          title={this.state.subject.title} 
+          sub={this.state.subject.sub} 
+          onChangeTitle={
+            function(){
+              this.setState({
+                mode: 'welcome'
+              });
+            }.bind(this)
+          }>
+        </Subject>
+        <TOC data={this.state.contents} onClick={
+          function(id) {
+            console.log(id)
+            this.setState({
+              mode: 'read',
+              conditioned_id: id
+            });
+          }.bind(this)
+        }></TOC>
+        <Content title={_title} desc={_desc}></Content>
       </div>
     );
   }

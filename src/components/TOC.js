@@ -9,7 +9,14 @@ class TOC extends Component{
       <nav>
         <ul>
           {data.map(i => (
-            <li key={i.id}><a href={'/content/'+i.id}>{i.title}</a></li>
+            <li key={i.id}>
+              <a href={'/content/'+i.id} onClick={
+                function(id,e){
+                  e.preventDefault();
+                  this.props.onClick(id);
+                }.bind(this,i.id)
+              }>{i.title}</a>
+            </li>
           ))}
         </ul>
       </nav>
