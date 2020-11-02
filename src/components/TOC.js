@@ -1,10 +1,14 @@
 import React, { Component } from 'react';
 
 class TOC extends Component{
+  shouldComponentUpdate(newProps, newState) {
+    console.log(newProps.data);
+    console.log(this.props.data)
+    return false;
+  }
   render(){
+    console.log("===> TOC render");
     const data = this.props.data;
-    
-
     return (
       <nav>
         <ul>
