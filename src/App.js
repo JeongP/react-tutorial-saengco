@@ -14,37 +14,53 @@ class App extends Component {
   // 생성자는 컴포넌트가 생성될 때, render 보다 먼저 호출되어 컴포넌트의 값을 초기화 시켜주는 역할을 한다.
   constructor(props) {
     super(props);
+    this.max_contents_id = 3;
     this.state = {
-      mode: "read",
+      mode: "create",
       conditioned_id: 2,
       welcome: {title: 'WELCOME', desc:"REACT WORLD!"},
       subject:{title: 'WEB', sub:"world wide web!"},
       contents: [
         {id:1, title:'HTML', desc:'HTML is for information'},
         {id:2, title:'CSS', desc:'CSS is for design'},
-        {id:3, title:'JavaScript', desc:'JavaScript is for interactive'}
+        {id:3, title:'JavaScript', desc:'JavaScript is   for interactive'}
       ]
     }
-
   }
-
+  
   render() {
-    let _title, _desc = null;
+    let _title, _desc, _article= null;
     if (this.state.mode === "welcome") {
       _title = this.state.welcome.title;
       _desc = this.state.welcome.desc;
-    } else {
+      _article = <ReadContent title={_title} desc={_desc}></ReadContent>;
+    } else if (this.state.mode === "read"){
       let id = this.state.conditioned_id;
       var i=0;
       while(i<this.state.contents.length) {
         if(id === this.state.contents[i].id) {
           _title = this.state.contents[i].title;
           _desc = this.state.contents[i].desc;
+          _article = <ReadContent title={_title} desc={_desc}></ReadContent>;
           break;
         }
         i++;
       }
+    } else if (this.state.mode === "create") {
+      _article = <CreateContent onSubmit={
+        function(title, desc){
+          this.max_contents_id = this.max_contents_id+1;
+          // console.log(this.max_contents_id);
+          var _contents = this.state.contents.concat(
+            {id:this.max_contents_id, title:title, desc:desc}
+          )
+          this.setState({
+            contents:_contents
+          })
+        }.bind(this)
+      }></CreateContent>
     }
+    console.log(this.max_contents_id);
     console.log('render!', this);
     return (
       <div className="App">
@@ -61,16 +77,25 @@ class App extends Component {
             }.bind(this)
           }>
         </Subject>
+        <Control onChangeMode = {
+          function(_mode){
+            console.log(_mode);
+            this.setState({
+              mode: _mode
+            });
+          }.bind(this)
+        }></Control>
         <TOC data={this.state.contents} onClick={
           function(id) {
-            console.log(id)
             this.setState({
               mode: 'read',
               conditioned_id: id
             });
           }.bind(this)
         }></TOC>
-        <Content title={_title} desc={_desc}></Content>
+
+        {_article}
+        
       </div>
     );
   }
