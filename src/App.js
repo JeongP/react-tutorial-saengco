@@ -10,14 +10,14 @@ import Content from './components/Content';
 
 
 class App extends Component {
-
+  
   // 생성자는 컴포넌트가 생성될 때, render 보다 먼저 호출되어 컴포넌트의 값을 초기화 시켜주는 역할을 한다.
   constructor(props) {
     super(props);
     this.max_contents_id = 3;
     this.state = {
-      mode: "create",
-      conditioned_id: 2,
+      mode: "welcome",
+      selected_id: 2,
       welcome: {title: 'WELCOME', desc:"REACT WORLD!"},
       subject:{title: 'WEB', sub:"world wide web!"},
       contents: [
@@ -27,41 +27,83 @@ class App extends Component {
       ]
     }
   }
-  
-  render() {
+
+  findContent() {
+
+    var i=0;
+    while(i<this.state.contents.length) {
+      var content = this.state.contents[i];
+      if(content.id === this.state.selected_id) {
+        return content;
+      }
+      i++;
+    }
+  }
+
+  getContents = () => {
     let _title, _desc, _article= null;
     if (this.state.mode === "welcome") {
       _title = this.state.welcome.title;
       _desc = this.state.welcome.desc;
       _article = <ReadContent title={_title} desc={_desc}></ReadContent>;
     } else if (this.state.mode === "read"){
-      let id = this.state.conditioned_id;
-      var i=0;
-      while(i<this.state.contents.length) {
-        if(id === this.state.contents[i].id) {
-          _title = this.state.contents[i].title;
-          _desc = this.state.contents[i].desc;
-          _article = <ReadContent title={_title} desc={_desc}></ReadContent>;
-          break;
-        }
-        i++;
-      }
+      var _content = this.findContent();
+      _article = <ReadContent title={_content.title} desc={_content.desc}></ReadContent>;
     } else if (this.state.mode === "create") {
       _article = <CreateContent onSubmit={
         function(title, desc){
           this.max_contents_id = this.max_contents_id+1;
-          // console.log(this.max_contents_id);
-          var _contents = this.state.contents.concat(
-            {id:this.max_contents_id, title:title, desc:desc}
-          )
+          
+        // concat 으로 복사하는 방법
+          // var _contents = this.state.contents.concat(
+          //   {id:this.max_contents_id, title:title, desc:desc}
+          // )
+          
+        // Array.from으로 복사하는 방법
+          var _contents = Array.from(this.state.contents);
+          _contents.push({id:this.max_contents_id, title:title, desc:desc});
           this.setState({
-            contents:_contents
+            contents:_contents,
+            mode: 'read',
+            selected_id: this.max_contents_id
           })
         }.bind(this)
       }></CreateContent>
+    } else if(this.state.mode === 'update') {
+      var _content = this.findContent();
+      _article = <UpdateContent content={_content}
+        onSubmit={
+          function(_id,_title,_desc){
+            // this.state.selected_id = _id;
+            var _contents = Array.from(this.state.contents);
+            var i=0;
+            while(i<_contents.length) {
+              console.log(_id, this.state.contents[i].id);
+              if(_id == this.state.contents[i].id) {
+                console.log('진입')
+                this.setState({
+                  mode: "read",
+                  selected_id: _id
+                })
+                _contents[i] = {id: _id, title: _title, desc: _desc};
+                break;
+              }
+              i++;
+            }
+            this.setState({
+              contents: _contents
+            })
+          }.bind(this)
+        }
+      ></UpdateContent>
     }
-    console.log(this.max_contents_id);
-    console.log('render!', this);
+    // console.log(this.max_contents_id);
+    // console.log('render!', this);
+    return _article;
+  }
+
+
+  render() {
     return (
       <div className="App">
         {/* 상위 컴포넌트의 state 값을 하위 컴포넌트의 props의 값으로 전달하는 것 가능. */}
@@ -89,12 +131,12 @@ class App extends Component {
           function(id) {
             this.setState({
               mode: 'read',
-              conditioned_id: id
+              selected_id: id
             });
           }.bind(this)
         }></TOC>
 
-        {_article}
+        {this.getContents()}
         
       </div>
     );
